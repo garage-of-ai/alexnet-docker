@@ -5,7 +5,7 @@
 ## Cấu trúc dự án
 
 ```
-.
+alexnet-docker/
 ├── README.md              
 ├── requirements.txt       # Cài đặt các thư viện python cần thiết
 ├── Dockerfile             # Kịch bản docker sẵn sàng để đóng gói
