@@ -8,50 +8,69 @@
 - **NVIDIA Docker Runtime** (optional) — nếu muốn chạy với GPU
 - Không cần cài đặt Python, PyTorch, CUDA trên máy host
 
-## Cách chạy
+## Cách chạy trên Docker
 
-### Build image
+Trước hết, hãy khởi động Docker trên máy bạn.
+
+### Bước 1: Build docker
+Lệnh này sẽ giúp bạn build image thành một docker tên là mnist-cnn khi đang đứng ở thư mục chứa Dockerfile.
 
 ```bash
 docker build -t mnist-cnn .
 ```
 
-### Chạy training
+### Bước 2: Chạy docker
 
+Lệnh này sẽ giúp bạn chạy container bạn vừa build.
 ```bash
 docker run --gpus all -it -v $(pwd)/checkpoints:/workspace/checkpoints mnist-cnn
-# Trong container:
-python3 train.py --output_dir ./checkpoints --epochs 5 --batch_size 64
+
 ```
 
-### Chạy evaluation
 
+Nếu bạn dùng windows thì dùng lệnh này:
 ```bash
-docker run --gpus all -it -v $(pwd)/checkpoints:/workspace/checkpoints mnist-cnn
-# Trong container:
+docker run --gpus all -it -v ${PWD}/checkpoints:/workspace/checkpoints mnist-cnn
+
+```
+
+Sau khi hoàn thành bước trên và không còn gì sai sót, khả năng cao bạn sẽ chui vào môi trường bên trong container.
+
+### Bước 3: Huấn luyện
+
+Sau khi bước vào trong container, ta sẽ tiến hành làm việc với terminal của container đó.
+Chạy lệnh sau thì sẽ thực hiện quá trình huấn luyện.
+```bash
+python3 train.py --output_dir ./checkpoints --epochs 5 --batch_size 64
+```
+Bạn có thể sửa nơi lưu checkpoint, số epoch hay kích thước batch ngay trên câu lệnh.
+Quá trình huấn luyện bao gồm tải dữ liệu nếu chưa có, thực hiện vòng lặp huấn luyện và lưu checkpoint.
+### Bước 4: Chạy evaluation
+Bạn vẫn ở trong container sau khi huấn luyện xong.
+Chạy lệnh sau thì sẽ thực hiện việc đánh giá mô hình được huấn luyện.
+```bash
 python3 evaluation.py --checkpoint ./checkpoints/model.pt
 ```
 
 **Lưu ý:** 
-- Bỏ `--gpus all` nếu không có GPU (sẽ tự chạy trên CPU)
-- `-v` để mount folder checkpoints ra ngoài host (để lưu model)
-- `-it` để có interactive shell trong container
+- `--gpus all` dùng để phát hiện và dùng gpu của máy.
+- `-v` để tự động đồng bộ thư mục checkpoints từ container ra ngoài máy.
+- `-it` để có interactive shell trong container.
 
 ## Cấu trúc
 
 ```
 .
-├── CLAUDE.md              # Hướng dẫn dự án
-├── README.md              # File này
-├── requirements.txt       # Dependencies (torch, torchvision)
-├── Dockerfile             # Cấu hình Docker image
-├── train.py               # Script huấn luyện
-├── evaluation.py          # Script đánh giá mô hình
+├── README.md              
+├── requirements.txt       # Cài đặt các thư viện python cần thiết
+├── Dockerfile             # Kịch bản docker sẵn sàng để đóng gói
+├── train.py               # Đoạn mã huấn luyện
+├── evaluation.py          # Đoạn mã đánh giá mô hình sau khi huấn luyện
 └── src/
     ├── __init__.py
-    ├── model.py           # AlexNet architecture
-    ├── data.py            # Load MNIST dataset
-    └── trainer.py         # Training loop
+    ├── model.py           # Chứa kiến trúc AlexNet
+    ├── data.py            # Tải dataset MNIST
+    └── trainer.py         # Hàm lặp huấn luyện
 ```
 
 ### Các file chính
