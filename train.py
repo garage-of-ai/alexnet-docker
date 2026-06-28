@@ -21,9 +21,11 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
+    print("Loading AlexNet...")
     model = AlexNet(num_classes=10).to(device)
-    print("Model loaded: AlexNet")
-
+    print("AlexNet loaded")
+    
+    print("Loading dataset...")
     train_loader, test_loader = get_data_loaders(batch_size=args.batch_size)
     print(f"Data loaded with batch size: {args.batch_size}")
 
