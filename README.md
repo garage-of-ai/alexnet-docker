@@ -2,11 +2,26 @@
 
 Ôi trời đất ơi, định tìm kiếm gì ở repo này? Tôi quá mệt mỏi để cài đủ thứ trên máy rồi, nên viết tạm cái đóng gói, chạy một lần rồi vứt đi thôi, chứ có gì hay ho ở đây đâu.
 
-## Yêu cầu
+## Cấu trúc dự án
 
-- **Docker** — để build image
-- **NVIDIA Docker Runtime** (optional) — nếu muốn chạy với GPU
-- Không cần cài đặt Python, PyTorch, CUDA trên máy host
+```
+.
+├── README.md              
+├── requirements.txt       # Cài đặt các thư viện python cần thiết
+├── Dockerfile             # Kịch bản docker sẵn sàng để đóng gói
+├── train.py               # Đoạn mã huấn luyện
+├── evaluation.py          # Đoạn mã đánh giá mô hình sau khi huấn luyện
+└── src/
+    ├── __init__.py
+    ├── model.py           # Chứa kiến trúc AlexNet
+    ├── data.py            # Tải dataset MNIST
+    └── trainer.py         # Hàm lặp huấn luyện
+```
+
+## Yêu cầu chạy
+
+- Cần cài **Docker** về máy nếu muốn chạy bằng docker
+- Không cần cài đặt sẵn Python, PyTorch, CUDA trên máy cục bộ, vì vốn dĩ đó là mục đích dùng docker.
 
 ## Cách chạy trên Docker
 
@@ -24,14 +39,11 @@ docker build -t mnist-cnn .
 Lệnh này sẽ giúp bạn chạy container bạn vừa build.
 ```bash
 docker run --gpus all -it -v $(pwd)/checkpoints:/workspace/checkpoints mnist-cnn
-
 ```
-
 
 Nếu bạn dùng windows thì dùng lệnh này:
 ```bash
 docker run --gpus all -it -v ${PWD}/checkpoints:/workspace/checkpoints mnist-cnn
-
 ```
 
 Sau khi hoàn thành bước trên và không còn gì sai sót, khả năng cao bạn sẽ chui vào môi trường bên trong container.
@@ -57,32 +69,4 @@ python3 evaluation.py --checkpoint ./checkpoints/model.pt
 - `-v` để tự động đồng bộ thư mục checkpoints từ container ra ngoài máy.
 - `-it` để có interactive shell trong container.
 
-## Cấu trúc
 
-```
-.
-├── README.md              
-├── requirements.txt       # Cài đặt các thư viện python cần thiết
-├── Dockerfile             # Kịch bản docker sẵn sàng để đóng gói
-├── train.py               # Đoạn mã huấn luyện
-├── evaluation.py          # Đoạn mã đánh giá mô hình sau khi huấn luyện
-└── src/
-    ├── __init__.py
-    ├── model.py           # Chứa kiến trúc AlexNet
-    ├── data.py            # Tải dataset MNIST
-    └── trainer.py         # Hàm lặp huấn luyện
-```
-
-### Các file chính
-
-- **`train.py`** — Huấn luyện CNN trên MNIST
-  - Args: `--output_dir`, `--epochs`, `--batch_size`, `--lr`
-  
-- **`evaluation.py`** — Đánh giá mô hình trên test set
-  - Args: `--checkpoint` (đường dẫn tới model)
-
-- **`src/model.py`** — Kiến trúc AlexNet (adapt cho MNIST 28x28 → 224x224)
-
-- **`src/data.py`** — Load MNIST, transform images, tạo DataLoader
-
-- **`src/trainer.py`** — Training loop, save checkpoint, auto GPU/CPU fallback
